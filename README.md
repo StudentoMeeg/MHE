@@ -1,4 +1,4 @@
-# MHE_2
+# MHE
  Metaheurestyki
 
 Zadanie 2 -> 3 Partition problem:
