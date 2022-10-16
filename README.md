@@ -1,2 +1,2 @@
-# MHE_2
+# MHE
  Metaheurestyki
