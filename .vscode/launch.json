@@ -7,7 +7,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${fileDirname}\\${fileBasenameNoExtension}.exe",
-            "args": ["0", "1", "2", "5", "10", "12", "14", "20", "20", "24", "45", "47"],
+            "args": ["1", "2", "5", "6", "7", "9", "1", "2", "5", "6", "7", "9", "1", "2", "5", "6", "7", "9", "1", "2", "5", "6", "7", "9"],
             "stopAtEntry": false,
             "cwd": "C:\\msys64\\mingw64\\bin",
             "environment": [],
