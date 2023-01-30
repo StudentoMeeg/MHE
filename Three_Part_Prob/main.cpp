@@ -24,10 +24,11 @@ int main(int argc, char **argv)
     bool showFitAvg;
     bool showTime;
     bool showFitCount;
+    bool showDataForGraph;
     int shuffleData;
 
 
-    map<string, function<vector<int>(std::vector<int>, int, int, bool, bool, bool, bool, bool)>> methods = {
+    map<string, function<vector<int>(std::vector<int>, int, int, bool, bool, bool, bool, bool, bool)>> methods = {
             {"bruteForce", bruteForce},
             {"losoweProbkowanie", losoweProbkowanie},
             {"wspinaczkaDeterm", wspinaczkaDeterm},
@@ -40,7 +41,7 @@ int main(int argc, char **argv)
     auto help = arg(argc, argv, "help", false);
 
     iterations_t = arg(argc, argv, "iterations", 1000, "Maximum number of iterations.");
-    method_t = arg(argc, argv, "method", std::string("bruteForce"),"Method Available are: bruteForce TABU losoweProbkowanie wspinaczkaDeterm wspinaczkaLosowa.");
+    method_t = arg(argc, argv, "method", std::string("wspinaczkaDeterm"),"Method Available are: bruteForce TABU losoweProbkowanie wspinaczkaDeterm wspinaczkaLosowa.");
     link_t = arg(argc,argv,"link", std::string("..\\data.txt"), "Path to the input file");
     showIter = arg(argc, argv, "showIterations", false, "Whether to show the Iteration number.");
     showFitAvg = arg(argc, argv, "showFitAvg", false, "Whether to show the method's fitness");
@@ -49,6 +50,8 @@ int main(int argc, char **argv)
     showResultFit = arg(argc, argv,"showResultFit", false, "Whether to show the result fitness.");
     showTime = arg(argc, argv, "showTime", false, "Whether to show the time for the method to reach it's results.");
     shuffleData = arg(argc, argv, "shuffleData", 0, "Whether to shuffle data beforehand.");
+    showDataForGraph = arg(argc, argv, "showDataForGraph", false, "Whether or not show data in a ready for graph format.");
+
 
     if (help) {
         std::cout << "help screen.." << std::endl;
@@ -89,10 +92,16 @@ int main(int argc, char **argv)
         std::shuffle(std::begin(multiset), std::end(multiset), RNG);
     }
 
+    if(showDataForGraph) {
+        cout << "Iter\tFitCount Fit\tTime" << endl;
+    }
     auto start = std::chrono::steady_clock::now();
-    vector<int> result = methods.at(method_t)(multiset, T, iterations_t, showIter, showResult, showFitAvg, showFitCount, showResultFit);
+    vector<int> result = methods.at(method_t)(multiset, T, iterations_t, showIter, showResult, showFitAvg, showFitCount, showResultFit, showDataForGraph);
     auto end = std::chrono::steady_clock::now();
     std::chrono::duration<double> elapsed_seconds = end-start;
+    if(showDataForGraph) {
+        cout << elapsed_seconds.count();
+    }
     if(showTime) {
         cout << "Time elapsed: " << elapsed_seconds.count() << "s.";
     }

@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <random>
+#include <chrono>
 #include "methods.h"
 
 auto rng = std::default_random_engine{};
@@ -62,8 +63,9 @@ int fitness(std::vector<int> S, int T)
 
 
 
-std::vector<int> bruteForce(std::vector<int> S, int T, int i, bool Iter, bool Result, bool FitAvg, bool FitCount, bool ResultFit)
+std::vector<int> bruteForce(std::vector<int> S, int T, int i, bool Iter, bool Result, bool FitAvg, bool FitCount, bool ResultFit, bool showDataForGraph)
 {
+    auto start = std::chrono::steady_clock::now();
     std::vector<int> best;
     int bestError = -1;
     int iter = 0;
@@ -81,15 +83,14 @@ std::vector<int> bruteForce(std::vector<int> S, int T, int i, bool Iter, bool Re
             bestError = collectionErrorSum;
             best = S;
         }
-        if(Iter) {
-            std::cout << "\n"
-                      << "iter: " << iter << std::endl;
-        }
+
         if(Result) {
             wypiszWektor(S);
         }
-        if(ResultFit) {
-            std::cout << "error score: " << collectionErrorSum << ", current best: " << bestError << std::endl;
+        if(showDataForGraph) {
+            auto end = std::chrono::steady_clock::now();
+            std::chrono::duration<double> elapsed_seconds = end-start;
+            std::cout << iter << "\t" << elapsed_seconds.count() << "\t" << fitCount << "\t" << bestError << "\t" << std::endl;
         }
         if(bestError == 0) {
             if(FitAvg) {
@@ -99,12 +100,18 @@ std::vector<int> bruteForce(std::vector<int> S, int T, int i, bool Iter, bool Re
             if(FitCount) {
                 std::cout << "Fit count: " << fitCount << std::endl;
             }
+            if(Iter) {
+                std::cout << "\n"
+                          << "iter: " << iter << std::endl;
+            }
+            if(ResultFit) {
+                std::cout << "error score: " << collectionErrorSum << ", current best: " << bestError << std::endl;
+            }
             return best;
         }
         iter++;
         i--;
     } while (std::next_permutation(S.begin(), S.end()) && i > 0);
-
     if(FitAvg) {
         avgFit = avgFit/iter;
         std::cout << "Avg Fit: " << avgFit << std::endl;
@@ -115,8 +122,9 @@ std::vector<int> bruteForce(std::vector<int> S, int T, int i, bool Iter, bool Re
     return best;
 }
 
-std::vector<int> losoweProbkowanie(std::vector<int> S, int T, int i, bool Iter, bool Result, bool FitAvg, bool FitCount, bool ResultFit)
+std::vector<int> losoweProbkowanie(std::vector<int> S, int T, int i, bool Iter, bool Result, bool FitAvg, bool FitCount, bool ResultFit, bool showDataForGraph)
 {
+    auto start = std::chrono::steady_clock::now();
     std::vector<int> best;
     int bestError = -1;
     int iter = 0;
@@ -143,6 +151,11 @@ std::vector<int> losoweProbkowanie(std::vector<int> S, int T, int i, bool Iter, 
         if(ResultFit) {
             std::cout << "error score: " << collectionErrorSum << ", current best: " << bestError << std::endl;
         }
+        if(showDataForGraph) {
+            auto end = std::chrono::steady_clock::now();
+            std::chrono::duration<double> elapsed_seconds = end-start;
+            std::cout << iter << "\t" << elapsed_seconds.count() << "\t" << fitCount << "\t" << bestError << "\t" << std::endl;
+        }
         if(bestError == 0) {
             if(FitAvg) {
                 avgFit = avgFit/iter;
@@ -155,7 +168,15 @@ std::vector<int> losoweProbkowanie(std::vector<int> S, int T, int i, bool Iter, 
         }
         iter++;
         i--;
-        std::shuffle(std::begin(S), std::end(S), rng);
+        std::vector<int> sTemp = S;
+        std::shuffle(std::begin(sTemp), std::end(sTemp), rng);
+        int tempScore = fitness(sTemp, T);
+        fitCount = fitCount + 1;
+
+        if (tempScore < collectionErrorSum)
+        {
+            S = sTemp;
+        }
 
     } while (i > 0);
     if(FitAvg) {
@@ -168,14 +189,15 @@ std::vector<int> losoweProbkowanie(std::vector<int> S, int T, int i, bool Iter, 
     return best;
 }
 
-std::vector<int> wspinaczkaDeterm(std::vector<int> S, int T, int i, bool Iter, bool Result, bool FitAvg, bool FitCount, bool ResultFit)
+std::vector<int> wspinaczkaDeterm(std::vector<int> S, int T, int i, bool Iter, bool Result, bool FitAvg, bool FitCount, bool ResultFit, bool showDataForGraph)
 {
+    auto start = std::chrono::steady_clock::now();
     double avgFit = 0.0;
     int fitCount = 0;
     std::vector<int> best;
     int bestError = -1;
     int iter = 0;
-    int iterTemp = 0;
+    int iterTemp = iter % S.size();
     int temp = 0;
     do
     {
@@ -189,7 +211,6 @@ std::vector<int> wspinaczkaDeterm(std::vector<int> S, int T, int i, bool Iter, b
             best = S;
         }
 
-
         if(Iter) {
             std::cout << "\n"
                       << "iter: " << iter << std::endl;
@@ -200,6 +221,11 @@ std::vector<int> wspinaczkaDeterm(std::vector<int> S, int T, int i, bool Iter, b
         if(ResultFit) {
             std::cout << "error score: " << collectionErrorSum << ", current best: " << bestError << std::endl;
         }
+        if(showDataForGraph) {
+            auto end = std::chrono::steady_clock::now();
+            std::chrono::duration<double> elapsed_seconds = end-start;
+            std::cout << iter << "\t" << elapsed_seconds.count() << "\t" << fitCount << "\t" << bestError << "\t" << std::endl;
+        }
         if(bestError == 0) {
             if(FitAvg) {
                 avgFit = avgFit/iter;
@@ -208,31 +234,48 @@ std::vector<int> wspinaczkaDeterm(std::vector<int> S, int T, int i, bool Iter, b
             if(FitCount) {
                 std::cout << "Fit count: " << fitCount << std::endl;
             }
+
             return best;
         }
-        for (int a = 0; a < S.size(); a++)
-        {
-            iterTemp = iter % S.size();
-            temp = S[iterTemp];
-            S[iterTemp] = S[iterTemp + a];
-            S[iterTemp + a] = temp;
 
-            int tempScore = fitness(S, T);
+        std::vector<int> sTemp = S;
+        int bestTempScore = 99;
+        int index = 0;
+
+        for(int a = 0; a < sTemp.size(); a++) {
+            temp = sTemp[iterTemp];
+            sTemp[iterTemp] = sTemp[(iterTemp + a) % sTemp.size()];
+            sTemp[(iterTemp + a) % sTemp.size()] = temp;
+            int tempScoreLoop = fitness(sTemp, T);
+
             fitCount = fitCount + 1;
+            if(tempScoreLoop < bestTempScore ) {
+                bestTempScore = tempScoreLoop;
+                index = a;
 
-            if (tempScore < collectionErrorSum) { }
-            else
-            {
-                temp = S[iterTemp];
-                S[iterTemp] = S[iterTemp + a];
-                S[iterTemp + a] = temp;
             }
+            sTemp = S;
+        }
+
+        temp = S[iterTemp];
+        S[iterTemp] = S[(iterTemp + index) % S.size()];
+        S[(iterTemp + index) % S.size()] = temp;
+
+        int tempScore = fitness(S, T);
+        fitCount = fitCount + 1;
+
+        if (tempScore > collectionErrorSum)
+        {
+            temp = S[iterTemp];
+            S[iterTemp] = S[(iterTemp + index)% S.size()];
+            S[(iterTemp + index)% S.size()] = temp;
         }
 
         iter++;
         i--;
 
     } while (i > 0);
+
     if(FitAvg) {
         avgFit = avgFit/iter;
         std::cout << "Avg Fit: " << avgFit << std::endl;
@@ -243,8 +286,9 @@ std::vector<int> wspinaczkaDeterm(std::vector<int> S, int T, int i, bool Iter, b
     return best;
 }
 
-std::vector<int> wspinaczkaLosowa(std::vector<int> S, int T, int i, bool Iter, bool Result, bool FitAvg, bool FitCount, bool ResultFit)
+std::vector<int> wspinaczkaLosowa(std::vector<int> S, int T, int i, bool Iter, bool Result, bool FitAvg, bool FitCount, bool ResultFit, bool showDataForGraph)
 {
+    auto start = std::chrono::steady_clock::now();
     std::shuffle(std::begin(S), std::end(S), rng);
     std::vector<int> best;
     int bestError = -1;
@@ -271,6 +315,11 @@ std::vector<int> wspinaczkaLosowa(std::vector<int> S, int T, int i, bool Iter, b
         }
         if(ResultFit) {
             std::cout << "error score: " << collectionErrorSum << ", current best: " << bestError << std::endl;
+        }
+        if(showDataForGraph) {
+            auto end = std::chrono::steady_clock::now();
+            std::chrono::duration<double> elapsed_seconds = end-start;
+            std::cout << iter << "\t" << elapsed_seconds.count() << "\t" << fitCount << "\t" << bestError << "\t" << std::endl;
         }
         if(bestError == 0) {
             if(FitAvg) {
@@ -303,18 +352,20 @@ std::vector<int> wspinaczkaLosowa(std::vector<int> S, int T, int i, bool Iter, b
     return best;
 }
 
-std::vector<int> TABU(std::vector<int> S, int T, int i, bool Iter, bool Result, bool FitAvg, bool FitCount, bool ResultFit)
+std::vector<int> TABU(std::vector<int> S, int T, int i, bool Iter, bool Result, bool FitAvg, bool FitCount, bool ResultFit, bool showDataForGraph)
 {
+    auto start = std::chrono::steady_clock::now();
     std::shuffle(std::begin(S), std::end(S), rng);
     int tabu = 25;
     std::vector<std::vector<int>> t;
     std::vector<int> best;
-    int tabuCount = 0;
     int fitCount = 0;
     int bestError = -1;
     int flag = -1;
     int iter = 0;
     double avgFit = 0;
+    int iterTemp = iter % S.size();
+    int temp = 0;
 
     do
     {
@@ -329,9 +380,31 @@ std::vector<int> TABU(std::vector<int> S, int T, int i, bool Iter, bool Result, 
             best = S;
         }
 
-        int r = rand() % S.size();
-        int r2 = rand() % S.size();
-        std::cout << "index 1: " << r << ", index 2: " << r2 << std::endl;
+        t.push_back(S);
+        std::vector<int> sTemp = S;
+        int bestTempScore = 99;
+        int index = 0;
+
+        for(int a = 0; a < sTemp.size(); a++) {
+            temp = sTemp[iterTemp];
+            sTemp[iterTemp] = sTemp[(iterTemp + a) % sTemp.size()];
+            sTemp[(iterTemp + a) % sTemp.size()] = temp;
+
+            if (!std::count(t.begin(), t.end(), sTemp)) {
+                int tempScoreLoop = fitness(sTemp, T);
+                fitCount = fitCount + 1;
+                if (tempScoreLoop < bestTempScore) {
+                    bestTempScore = tempScoreLoop;
+                    index = a;
+                }
+            }
+            sTemp = S;
+        }
+
+        temp = S[iterTemp];
+        S[iterTemp] = S[(iterTemp + index) % S.size()];
+        S[(iterTemp + index) % S.size()] = temp;
+        t.push_back(S);
 
         if (!std::count(t.begin(), t.end(), S)) {
             flag = -1;
@@ -360,15 +433,10 @@ std::vector<int> TABU(std::vector<int> S, int T, int i, bool Iter, bool Result, 
                 }
                 return best;
             }
-            t.push_back(S);
-            int temp = S[r];
-            S[r] = S[r2];
-            S[r2] = temp;
         }
         else
         {
-            tabuCount++;
-            if(tabuCount>=25) {
+            if(t.size()>=25) {
                 t.erase(t.begin());
             }
 
@@ -382,8 +450,13 @@ std::vector<int> TABU(std::vector<int> S, int T, int i, bool Iter, bool Result, 
             if(ResultFit) {
                 std::cout << "error score: " << collectionErrorSum << ", current best: " << bestError << std::endl;
             }
-
+            if(showDataForGraph) {
+                auto end = std::chrono::steady_clock::now();
+                std::chrono::duration<double> elapsed_seconds = end-start;
+                std::cout << iter << "\t" << elapsed_seconds.count() << "\t" << fitCount << "\t" << bestError << "\t" << std::endl;
+            }
             if(bestError == 0) {
+
                 if(FitAvg) {
                     avgFit = avgFit/iter;
                     std::cout << "Avg Fit: " << avgFit << std::endl;
@@ -394,11 +467,8 @@ std::vector<int> TABU(std::vector<int> S, int T, int i, bool Iter, bool Result, 
                 return best;
             }
 
-            int temp = S[r];
-            S[r] = S[r2];
-            S[r2] = temp;
+
         }
-        std::cout << tabuCount << std::endl;
         iter++;
         i--;
 
